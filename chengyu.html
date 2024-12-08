@@ -4,30 +4,80 @@
 <meta charset="UTF-8">
 <title>凿壁偷光</title>
 <style>
+  body {
+    font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+  }
+  .container {
+    width: 80%;
+    margin: auto;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
   h1 {
-    font-size: 2em; /* 可以根据需要调整h1的字体大小 */
+    font-size: 2.5em; /* 调整h1的字体大小 */
+    color: #333;
+    text-align: center;
+  }
+  .ruby-text {
+    font-size: 1.5em; /* 调整拼音字体大小 */
+    display: block;
+    margin-bottom: 20px; /* 增加底部边距 */
+  }
+  ruby rt {
+    font-size: 0.5em; /* 调整拼音字体大小 */
+    position: relative;
+    top: -1em; /* 调整拼音位置 */
+    left: 0;
+  }
+  ul {
+    list-style-type: none; /* 去除列表符号 */
+    padding: 0;
+  }
+  ul li {
+    background-color: #e9e9e9;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px; /* 圆角边框 */
+  }
+  img {
+    display: block;
+    margin: 20px auto; /* 使图片居中显示 */
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px; /* 圆角边框 */
+  }
+  iframe {
+    display: block;
+    margin: 20px auto; /* 使播放器居中显示 */
   }
 </style>
 </head>
 <body>
 
-<h1>
-  <ruby>凿<rp>(</rp><rt>záo</rt><rp>)</rp></ruby>
-  <ruby>壁<rp>(</rp><rt>bì</rt><rp>)</rp></ruby>
-  <ruby>偷<rp>(</rp><rt>tōu</rt><rp>)</rp></ruby>
-  <ruby>光<rp>(</rp><rt>guāng</rt><rp>)</rp></ruby>
-</h1>
+<div class="container">
+  <h1>
+    <ruby>凿<rp>(</rp><rt>záo</rt><rp>)</rp></ruby>
+    <ruby>壁<rp>(</rp><rt>bì</rt><rp>)</rp></ruby>
+    <ruby>偷<rp>(</rp><rt>tōu</rt><rp>)</rp></ruby>
+    <ruby>光<rp>(</rp><rt>guāng</rt><rp>)</rp></ruby>
+  </h1>
 
-<ul>
- <li>一位书生静静地坐在昏暗破旧的家中</li>
- <li>对着墙壁上一处自己亲手凿出的小洞</li>
- <li>一束微弱而坚定的光线穿透洞口，照亮了他的脸庞和手中的书卷</li>
- <li>在昏暗中，这束光成为了唯一的希望与指引，书生全神贯注地阅读着，仿佛整个世界都为之静止</li>
- <li>这幅水墨风格的画作，生动地诠释了“凿壁偷光”的成语，展现了书生勤奋刻苦、不屈不挠的求学精神。</li>
-</ul>
-<img src="成语图片.png" alt="凿壁偷光文生图">
-
-<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=1369588031&auto=1&height=66"></iframe>
+  <div class="ruby-text">
+    <ul>
+      <li>一位书生静静地坐在昏暗破旧的家中</li>
+      <li>对着墙壁上一处自己亲手凿出的小洞</li>
+      <li>一束微弱而坚定的光线穿透洞口，照亮了他的脸庞和手中的书卷</li>
+      <li>在昏暗中，这束光成为了唯一的希望与指引，书生全神贯注地阅读着，仿佛整个世界都为之静止</li>
+      <li>这幅水墨风格的画作，生动地诠释了“凿壁偷光”的成语，展现了书生勤奋刻苦、不屈不挠的求学精神。</li>
+    </ul>
+  </div>
+  <img src="成语图片.png" alt="凿壁偷光文生图">
+  <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=1369588031&auto=1&height=66"></iframe>
+</div>
 
 </body>
 </html>
