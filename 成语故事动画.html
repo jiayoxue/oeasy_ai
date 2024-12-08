@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>凿壁借光成语故事</title>
+<style>
+  body {
+    font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+  }
+  .container {
+    width: 80%;
+    max-width: 800px; /* 限制最大宽度 */
+    margin: auto;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  h1 {
+    font-size: 2.5em; /* 调整h1的字体大小 */
+    color: #333;
+  }
+  ruby rt {
+    font-size: 0.5em; /* 调整拼音字体大小 */
+    position: relative;
+    top: -1em; /* 调整拼音位置 */
+    left: 0;
+  }
+  .video-container {
+    position: relative;
+    padding-bottom: 75%; /* 4:3 的宽高比 */
+    height: 0;
+    overflow: hidden;
+  }
+  .video-container video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>
+    <ruby>凿<rp>(</rp><rt>záo</rt><rp>)</rp></ruby>
+    <ruby>壁<rp>(</rp><rt>bì</rt><rp>)</rp></ruby>
+    <ruby>借<rp>(</rp><rt>jiè</rt><rp>)</rp></ruby>
+    <ruby>光<rp>(</rp><rt>guāng</rt><rp>)</rp></ruby>
+    <ruby>成<rp>(</rp><rt>chéng</rt><rp>)</rp></ruby>
+    <ruby>语<rp>(</rp><rt>yǔ</rt><rp>)</rp></ruby>
+    <ruby>故<rp>(</rp><rt>gù</rt><rp>)</rp></ruby>
+    <ruby>事<rp>(</rp><rt>shì</rt><rp>)</rp></ruby>
+  </h1>
+  <!-- 嵌入同一目录下的视频 -->
+  <div class="video-container">
+    <video controls>
+      <source src="动画.mp4" type="video/mp4">
+      您的浏览器不支持视频标签。
+    </video>
+  </div>
+</div>
+
+</body>
+</html>
