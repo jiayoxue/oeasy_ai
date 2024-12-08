@@ -12,7 +12,7 @@
   }
   .container {
     width: 80%;
-    margin: auto;
+    margin: 40px auto; /* 调整外边距，使容器在页面中居中 */
     background-color: #fff;
     padding: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -43,16 +43,16 @@
     margin-bottom: 10px;
     border-radius: 5px; /* 圆角边框 */
   }
-  img {
+  .content {
+    text-align: center; /* 使图片和播放器居中显示 */
+  }
+  .content img,
+  .content iframe {
     display: block;
-    margin: 20px auto; /* 使图片居中显示 */
+    margin: 20px auto; /* 使图片和播放器居中显示 */
     max-width: 100%;
     height: auto;
     border-radius: 10px; /* 圆角边框 */
-  }
-  iframe {
-    display: block;
-    margin: 20px auto; /* 使播放器居中显示 */
   }
 </style>
 </head>
@@ -75,8 +75,12 @@
       <li>这幅水墨风格的画作，生动地诠释了“凿壁偷光”的成语，展现了书生勤奋刻苦、不屈不挠的求学精神。</li>
     </ul>
   </div>
-  <img src="成语图片.png" alt="凿壁偷光文生图">
-  <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=1369588031&auto=1&height=66"></iframe>
+
+  <div class="content">
+    <img src="成语图片.png" alt="凿壁偷光文生图">
+    <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=1369588031&auto=1&height=66"></iframe>
+  </div>
+
 </div>
 
 </body>
