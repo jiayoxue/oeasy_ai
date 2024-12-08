@@ -5,16 +5,22 @@
 <title>凿壁偷光</title>
 <style>
   .ruby-text {
-    font-size: 1.5em; /* 可以根据需要调整字体大小 */
+    font-size: 24px; /* 根据需要调整字体大小 */
   }
   .ruby-text ruby {
     display: inline-block;
-    vertical-align: top;
   }
   ruby rt {
-    font-size: 0.5em; /* 拼音字体大小相对于汉字的大小 */
+    font-size: 14px; /* 拼音字体大小相对于汉字的大小 */
+    position: absolute;
+    /* 上边距需要根据字体大小和行高进行调整 */
+    top: -20px;
+    left: 0;
+  }
+  /* 为每个汉字单独设置样式，确保拼音在正上方 */
+  .ruby-text rb {
+    display: inline-block;
     position: relative;
-    top: -1em; /* 调整拼音的位置，使其位于汉字正上方 */
   }
   .content {
     margin-top: 20px; /* 根据需要调整内容的上边距 */
@@ -24,7 +30,10 @@
 <body>
 
 <div class="ruby-text">
-  <ruby>凿<rt>záo</rt>壁<rt>bì</rt>偷<rt>tōu</rt>光<rt>guāng</rt></ruby>
+  <ruby>凿<rt>záo</rt></ruby>
+  <ruby>壁<rt>bì</rt></ruby>
+  <ruby>偷<rt>tōu</rt></ruby>
+  <ruby>光<rt>guāng</rt></ruby>
 </div>
 <div class="content">
   <ul>
