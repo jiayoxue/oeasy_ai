@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBTI 测试</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #e0f8f6; /* 浅绿色背景 */
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+  }
+  .container {
+    text-align: center;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin: 10px;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 居中对齐容器内的内容 */
+  }
+  .question {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #005792; /* 深蓝色 */
+  }
+  .options {
+    font-size: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* 居中对齐选项 */
+  }
+  .option {
+    display: block;
+    margin: 5px; /* 选项之间的间距 */
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    flex-basis: calc(50% - 10px); /* 选项宽度适应屏幕 */
+  }
+  .option:hover {
+    background-color: #e0f8f6;
+  }
+  .selected {
+    background-color: #90EE90; /* 淡绿色 */
+    color: white;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 18px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #005792; /* 深蓝色 */
+    color: white;
+    margin: 5px;
+  }
+  button:hover {
+    background-color: #003d66;
+  }
+  #result {
+    font-size: 24px;
+    margin-top: 20px;
+    color: #005792; /* 深蓝色 */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 居中对齐结果文本 */
+  }
+</style>
+</head>
+<body>
+
+<div class="container" id="container">
+  <div id="question" class="qauestion"></div>
+  <div class="options">
+    <!-- Options will be inserted here -->
+  </div>
+  <div id="buttonContainer" style="display: flex; justify-content: center; gap: 10px;">
+    <button id="nextButton">下一题</button>
+    <button id="submitButton">提交</button>
+  </div>
+</div>
+
+<div id="result" style="display:none;">
+  <div id="resultText"></div>
+  <button onclick="restartTest()">重新测试</button>
+</div>
+
+<script>
+// 测试题目
+const questions = [
+  { question: "你更喜欢哪种活动？", options: ["A. 宅在家中", "B. 参加大型Part!", "C. 团队合作打怪", "D. 独自完成一项秘密任务"], dimension: "EI" },
+  { question: "你如何做出人生大决定？", options: ["A. 全方位仔细逻辑分析", "B. 开心最重要！", "C. 相信自己的第六感", "D. 实用主义之上"], dimension: "TF" },
+  { question: "如果可以拥有一个超能力，你希望是？", options: ["A. 洞察之眼，细节尽在掌握", "B. 心灵触角，感受世界的脉动", "C. 脑力漩涡，智慧火花四溅", "D. 直觉闪电，一触即发的灵感"], dimension: "SN" },
+  { question: "你更倾向于哪种生活方式？", options: ["A. 严谨规划派","B. 随机应变族","C. 条理框架控","D. 自在逍遥者"], dimension: "JP" }
+];
+
+let currentQuestion = 0;
+let userAnswers = {};
+
+function showQuestion() {
+  const question = questions[currentQuestion];
+  document.getElementById('question').innerText = question.question;
+  const optionsContainer = document.querySelector('.options');
+  optionsContainer.innerHTML = ''; // Clear previous options
+
+  question.options.forEach((option, index) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerText = option;
+    div.onclick = function() {
+      selectOption(option.charAt(0), div); // Pass the div to the function
+    };
+    optionsContainer.appendChild(div);
+  });
+  
+  // Show the appropriate button
+  if (currentQuestion < questions.length - 1) {
+    document.getElementById('nextButton').style.display = 'inline-block';
+    document.getElementById('submitButton').style.display = 'none';
+  } else {
+    document.getElementById('nextButton').style.display = 'none';
+    document.getElementById('submitButton').style.display = 'inline-block';
+  }
+}
+
+function selectOption(answer, element) {
+  const options = document.querySelectorAll('.option');
+  options.forEach((option) => {
+    option.classList.remove('selected');
+  });
+  element.classList.add('selected');
+  userAnswers[questions[currentQuestion].dimension] = answer; // Store the answer
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  showQuestion();
+}
+
+function calculateResult() {
+  let ei = userAnswers.EI === 'A' || userAnswers.EI === 'B' ? 'I' : 'E';
+  let sn = userAnswers.SN === 'A' || userAnswers.SN === 'B' ? 'S' : 'N';
+  let tf = userAnswers.TF === 'A' || userAnswers.TF === 'B' ? 'T' : 'F';
+  let jp = userAnswers.JP === 'A' || userAnswers.JP === 'B' ? 'J' : 'P';
+
+  const mbti = ei + sn + tf + jp;
+  document.getElementById('resultText').innerText = `你的MBTI类型是：${mbti}`;
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('container').style.display = 'none';
+}
+
+function restartTest() {
+  currentQuestion = 0;
+  userAnswers = {};
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('container').style.display = 'block';
+  document.querySelectorAll('.option').forEach(option => {
+    option.classList.remove('selected');
+  });
+  showQuestion();
+}
+
+document.getElementById('nextButton').addEventListener('click', nextQuestion);
+document.getElementById('submitButton').addEventListener('click', calculateResult);
+
+showQuestion();
+</script>
+
+</body>
+</html>
