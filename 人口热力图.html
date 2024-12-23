@@ -69,6 +69,9 @@
             { name: '台湾', value: 2360 }
         ];
 
+        // 动态计算最大值
+        const maxPopulation = Math.max(...populationData.map(item => item.value));
+
         // 初始化 ECharts 实例
         const myChart = echarts.init(document.getElementById('main'));
 
@@ -81,30 +84,33 @@
             tooltip: {
                 trigger: 'item',
                 formatter: function (params) {
-                    return `${params.name}: ${params.value}万人`;
+                    return `${params.name}: ${params.value || '无数据'}万人`;
                 }
             },
             visualMap: {
                 min: 0,
-                max: 11346,
+                max: maxPopulation,
                 left: 'left',
                 top: 'bottom',
                 text: ['高', '低'],
-                calculable: true
+                calculable: true,
+                inRange: {
+                    color: ['#e0f7fa', '#006064'] // 从浅蓝到深蓝
+                }
             },
             series: [
                 {
                     name: '人口',
                     type: 'map',
                     mapType: 'china',
-                    roam: false,
+                    roam: true, // 启用缩放和拖动
                     label: {
                         show: true
                     },
                     data: populationData,
                     itemStyle: {
                         areaColor: '#ccc',
-                        borderColor: '#fff',
+                        borderColor: '#888',
                         borderWidth: 1
                     },
                     emphasis: {
