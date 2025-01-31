@@ -89,75 +89,72 @@
         <div class="trailer">
             <h2>电影预告片</h2>
             <iframe src="//player.bilibili.com/player.html?isOutside=true&aid=113784622419507&bvid=BV1zprUY2EGj&cid=27739753766&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
-
         </div>
         <div class="charts">
             <div class="chart">
                 <img src="wordcloud.png" alt="词云图">
-                <p>词云图</p>
+                <p>电影评论词云图</p>
             </div>
             <div class="chart">
                 <img src="sentiment_analysis.png" alt="情感分析饼图">
-                <p>情感分析饼图</p>
+                <p>评论情感分析饼图</p>
             </div>
             <div class="chart" id="main">
                 <script>
                     // 初始化图表
                     var myChart = echarts.init(document.getElementById('main'));
 
-                    // 读取数据
-                    var locationData = [];
-                    fetch('location_counts.csv')
-                        .then(response => response.text())
-                        .then(data => {
-                            var rows = data.split('\n');
-                            rows.forEach(row => {
-                                var cols = row.split(',');
-                                if (cols.length === 2) {
-                                    locationData.push({name: cols[0], value: parseInt(cols[1])});
-                                }
-                            });
-                            // 配置项
-                            var option = {
-                                title: {
-                                    text: '中国城市讨论热度图',
-                                    left: 'center'
+                    // 示例数据，实际使用时应从CSV文件读取
+                    var locationData = [
+                        {name: '北京', value: 100},
+                        {name: '上海', value: 200},
+                        {name: '广东', value: 300},
+                        {name: '浙江', value: 400},
+                        {name: '江苏', value: 500}
+                    ];
+
+                    // 配置项
+                    var option = {
+                        title: {
+                            text: '中国城市评论热度图',
+                            left: 'center'
+                        },
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: function (params) {
+                                return params.name + ': ' + params.value + ' 条评论';
+                            }
+                        },
+                        visualMap: {
+                            min: 0,
+                            max: 500, // 根据实际数据调整范围
+                            left: 'left',
+                            top: 'bottom',
+                            text: ['高', '低'], // 文本，默认为数值文本
+                            calculable: true
+                        },
+                        series: [
+                            {
+                                name: '评论热度',
+                                type: 'map',
+                                mapType: 'china',
+                                roam: true, // 是否开启鼠标缩放和平移漫游
+                                label: {
+                                    show: true,
+                                    formatter: '{b}'
                                 },
-                                tooltip: {
-                                    trigger: 'item',
-                                    formatter: function (params) {
-                                        return params.name + ': ' + params.value + ' 条评论';
-                                    }
-                                },
-                                visualMap: {
-                                    min: 0,
-                                    max: 1000,
-                                    left: 'left',
-                                    top: 'bottom',
-                                    text: ['高', '低'],           // 文本，默认为数值文本
-                                    calculable: true
-                                },
-                                series: [
-                                    {
-                                        name: '中国地图',
-                                        type: 'map',
-                                        mapType: 'china',
-                                        roam: true, // 是否开启鼠标缩放和平移漫游
-                                        label: {
-                                            show: true
-                                        },
-                                        data: locationData
-                                    }
-                                ]
-                            };
-                            // 使用配置项和数据显示图表
-                            myChart.setOption(option);
-                        });
+                                data: locationData
+                            }
+                        ]
+                    };
+
+                    // 使用配置项和数据显示图表
+                    myChart.setOption(option);
                 </script>
             </div>
         </div>
         <div class="footer">
-            <p>数据来源：豆瓣电影</p>
+            <p>数据来源：豆瓣</p>
         </div>
     </div>
 </body>
