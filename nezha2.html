@@ -1,39 +1,96 @@
-// 添加了完整的错误处理链
-async function loadHeatmapData() {
-  try {
-    const response = await fetch('location_counts.csv');
-    // 状态码检查
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    
-    // 数据处理流程
-    const rawData = await response.text();
-    const locationData = rawData
-      .split('\n')
-      .filter(row => row.trim())  // 过滤空行
-      .slice(1)  // 跳过CSV标题行
-      .map(row => {
-        // 处理可能包含逗号的城市名
-        const [province, ...valueParts] = row.split(',');
-        const value = parseInt(valueParts.join('').trim());
-        
-        // 数据有效性验证
-        if (!province || isNaN(value)) {
-          console.warn('无效数据行:', row);
-          return null;
+<script>
+    // 增强版数据加载函数
+    async function loadHeatmapData() {
+        try {
+            const response = await fetch('location_counts.csv');
+            if (!response.ok) {
+                throw new Error(`HTTP错误! 状态码: ${response.status}`);
+            }
+            const rawData = await response.text();
+            
+            // 数据处理增强
+            const locationData = rawData
+                .split('\n')
+                .filter(row => row.trim())  // 移除空行
+                .slice(1)  // 跳过CSV标题行（如果有）
+                .map(row => {
+                    // 处理可能包含逗号的城市名
+                    const [province, ...valueParts] = row.split(',');
+                    const value = parseInt(valueParts.join('').trim());
+                    
+                    if (!province || isNaN(value)) {
+                        console.warn('无效数据行:', row);
+                        return null;
+                    }
+                    
+                    return {
+                        name: province.trim().replace(/"/g, ''),
+                        value: value
+                    };
+                })
+                .filter(item => item !== null);  // 过滤无效数据
+
+            // 自动计算最大值并扩展颜色范围
+            const maxValue = Math.max(...locationData.map(item => item.value));
+            
+            // 配置热力图
+            var option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}：{c} 条评论'
+                },
+                visualMap: {
+                    min: 0,
+                    max: maxValue,
+                    left: '5%',
+                    bottom: '10%',
+                    text: ['高热度', '低热度'],
+                    calculable: true,
+                    inRange: {
+                        color: ['#e0f3f8', '#abd9e9', '#74add1', '#4575b4']
+                    }
+                },
+                series: [{
+                    type: 'map',
+                    map: 'china',
+                    roam: true,
+                    zoom: 1.2,
+                    label: {
+                        show: true,
+                        fontSize: 12
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            color: '#333'
+                        }
+                    },
+                    data: locationData,
+                    itemStyle: {
+                        areaColor: '#f5f5f5',
+                        borderColor: '#999'
+                    }
+                }]
+            };
+
+            heatmapChart.setOption(option);
+            
+        } catch (error) {
+            console.error('数据加载失败:', error);
+            // 显示错误信息
+            document.getElementById('heatmap-chart').innerHTML = 
+                `<div style="color: red; text-align: center; padding: 20px;">
+                    热力图数据加载失败：${error.message}
+                </div>`;
         }
-        
-        return {
-          name: province.trim().replace(/"/g, ''),
-          value: value
-        };
-      })
-      .filter(item => item !== null);
-  } catch (error) {
-    // 错误处理
-    console.error('数据加载失败:', error);
-    document.getElementById('heatmap-chart').innerHTML = 
-      `<div style="color: red; text-align: center; padding: 20px;">
-         热力图数据加载失败：${error.message}
-       </div>`;
-  }
-}
+    }
+
+    // 初始化并加载数据
+    var heatmapChart = echarts.init(document.getElementById('heatmap-chart'));
+    loadHeatmapData();
+
+    // 窗口自适应
+    window.addEventListener('resize', () => {
+        heatmapChart.resize();
+    });
+</script>
