@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>哪吒之魔童闹海评论数据大屏</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/map/js/china.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .movie-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .movie-info h1 {
+            font-size: 2.5em;
+            color: #2c3e50;
+        }
+        .movie-info p {
+            font-size: 1.2em;
+            color: #7f8c8d;
+        }
+        .charts {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .chart {
+            width: 48%;
+            margin-bottom: 20px;
+        }
+        .chart img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .chart #main {
+            width: 100%;
+            height: 600px;
+        }
+        .trailer {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .trailer iframe {
+            width: 100%;
+            height: 400px;
+            border-radius: 10px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #bdc3c7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="哪吒2网页背景.jpg" alt="哪吒之魔童闹海封面">
+        </div>
+        <div class="movie-info">
+            <h1>哪吒之魔童闹海</h1>
+            <p>电影简介：《哪吒之魔童闹海》是一部充满奇幻色彩的动画电影，讲述了哪吒在面对命运的挑战时，勇敢抗争的故事。影片以其精美的画面、深刻的主题和感人的故事赢得了观众的喜爱。</p>
+            <p>豆瓣评分：8.5</p>
+        </div>
+        <div class="trailer">
+            <h2>电影预告片</h2>
+            <iframe src="//player.bilibili.com/player.html?isOutside=true&aid=113784622419507&bvid=BV1zprUY2EGj&cid=27739753766&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+
+        </div>
+        <div class="charts">
+            <div class="chart">
+                <img src="wordcloud.png" alt="词云图">
+                <p>词云图</p>
+            </div>
+            <div class="chart">
+                <img src="sentiment_analysis.png" alt="情感分析饼图">
+                <p>情感分析饼图</p>
+            </div>
+            <div class="chart" id="main">
+                <script>
+                    // 初始化图表
+                    var myChart = echarts.init(document.getElementById('main'));
+
+                    // 读取数据
+                    var locationData = [];
+                    fetch('location_counts.csv')
+                        .then(response => response.text())
+                        .then(data => {
+                            var rows = data.split('\n');
+                            rows.forEach(row => {
+                                var cols = row.split(',');
+                                if (cols.length === 2) {
+                                    locationData.push({name: cols[0], value: parseInt(cols[1])});
+                                }
+                            });
+                            // 配置项
+                            var option = {
+                                title: {
+                                    text: '中国城市讨论热度图',
+                                    left: 'center'
+                                },
+                                tooltip: {
+                                    trigger: 'item',
+                                    formatter: function (params) {
+                                        return params.name + ': ' + params.value + ' 条评论';
+                                    }
+                                },
+                                visualMap: {
+                                    min: 0,
+                                    max: 1000,
+                                    left: 'left',
+                                    top: 'bottom',
+                                    text: ['高', '低'],           // 文本，默认为数值文本
+                                    calculable: true
+                                },
+                                series: [
+                                    {
+                                        name: '中国地图',
+                                        type: 'map',
+                                        mapType: 'china',
+                                        roam: true, // 是否开启鼠标缩放和平移漫游
+                                        label: {
+                                            show: true
+                                        },
+                                        data: locationData
+                                    }
+                                ]
+                            };
+                            // 使用配置项和数据显示图表
+                            myChart.setOption(option);
+                        });
+                </script>
+            </div>
+        </div>
+        <div class="footer">
+            <p>数据来源：豆瓣电影</p>
+        </div>
+    </div>
+</body>
+</html>
