@@ -1,40 +1,216 @@
-<script>
-    // 增强版数据加载函数
-    async function loadHeatmapData() {
-        try {
-            const response = await fetch('location_counts.csv');
-            if (!response.ok) {
-                throw new Error(`HTTP错误! 状态码: ${response.status}`);
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>哪吒之魔童闹海评论数据大屏</title>
+    
+    <!-- 加载ECharts核心库 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <!-- 加载中国地图扩展 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts/map/js/china.js"></script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: url('哪吒2网页背景.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #2c3e50;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-rows: auto auto;
+            gap: 40px;
+        }
+
+        .top-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            height: 500px;
+        }
+
+        .bottom-row {
+            height: 700px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .chart-card img {
+            width: 100%;
+            height: calc(100% - 50px);
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        #heatmap-chart {
+            width: 100%;
+            height: 100%;
+        }
+
+        .trailer-section {
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .trailer-iframe {
+            width: 85%;
+            height: 600px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .footer-info {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 12px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="dashboard-header">
+            <h1>哪吒之魔童闹海</h1>
+            <p style="margin-top: 15px;">豆瓣评分：8.5 | 累计票房：50.35亿 | 上映日期：2023-07-20</p>
+        </header>
+
+        <div class="dashboard-layout">
+            <!-- 上半部分 -->
+            <div class="top-row">
+                <div class="chart-card">
+                    <h3 style="color: #3498db; margin-bottom: 15px;">🗨️ 热门关键词云</h3>
+                    <img src="wordcloud.png" alt="词云图">
+                </div>
+                
+                <div class="chart-card">
+                    <h3 style="color: #e74c3c; margin-bottom: 15px;">❤️ 情感分布分析</h3>
+                    <img src="sentiment_analysis.png" alt="情感分析">
+                </div>
+            </div>
+
+            <!-- 下半部分 -->
+            <div class="bottom-row">
+                <div class="chart-card">
+                    <h3 style="text-align: center; color: #2ecc71; margin-bottom: 20px;">🌏 地域讨论热力图</h3>
+                    <div id="heatmap-chart"></div>
+                </div>
+            </div>
+        </div>
+
+        <section class="trailer-section">
+            <h2 style="margin-bottom: 25px; color: #34495e;">🎬 精彩预告片</h2>
+            <iframe class="trailer-iframe" 
+                    src="//player.bilibili.com/player.html?isOutside=true&aid=113784622419507&bvid=BV1zprUY2EGj&cid=27739753766&p=1" 
+                    scrolling="no" 
+                    allowfullscreen="true">
+            </iframe>
+        </section>
+
+        <footer class="footer-info">
+            <p>数据来源：豆瓣电影 | 数据更新：2023-08-01 | 技术支持：ECharts可视化</p>
+        </footer>
+    </div>
+
+    <script>
+        // ECharts加载检测
+        function checkECharts() {
+            if (typeof echarts === 'undefined') {
+                document.getElementById('heatmap-chart').innerHTML = `
+                    <div style="color:red; padding:20px; text-align:center;">
+                        可视化库加载失败，请检查网络连接后刷新页面
+                    </div>`;
+                return false;
             }
-            const rawData = await response.text();
-            
-            // 数据处理增强
-            const locationData = rawData
-                .split('\n')
-                .filter(row => row.trim())  // 移除空行
-                .slice(1)  // 跳过CSV标题行（如果有）
+            return true;
+        }
+
+        // 增强版数据加载
+        async function loadHeatmapData() {
+            try {
+                if (!checkECharts()) return;
+
+                const response = await fetch('location_counts.csv');
+                if (!response.ok) throw new Error(`数据请求失败，状态码：${response.status}`);
+                
+                const rawData = await response.text();
+                const locationData = processCSV(rawData);
+                
+                if (locationData.length === 0) {
+                    throw new Error('CSV数据格式不正确或为空');
+                }
+
+                initHeatmap(locationData);
+                
+            } catch (error) {
+                showErrorMessage(error);
+            }
+        }
+
+        // CSV数据处理
+        function processCSV(rawData) {
+            return rawData.split('\n')
+                .filter(row => row.trim())
+                .slice(1)
                 .map(row => {
-                    // 处理可能包含逗号的城市名
-                    const [province, ...valueParts] = row.split(',');
-                    const value = parseInt(valueParts.join('').trim());
-                    
-                    if (!province || isNaN(value)) {
-                        console.warn('无效数据行:', row);
-                        return null;
-                    }
-                    
+                    const [province, ...values] = row.split(',');
+                    const value = parseInt(values.join('').trim());
                     return {
                         name: province.trim().replace(/"/g, ''),
-                        value: value
+                        value: isNaN(value) ? 0 : value
                     };
                 })
-                .filter(item => item !== null);  // 过滤无效数据
+                .filter(item => item.name && item.value > 0);
+        }
 
-            // 自动计算最大值并扩展颜色范围
-            const maxValue = Math.max(...locationData.map(item => item.value));
-            
-            // 配置热力图
-            var option = {
+        // 初始化热力图
+        function initHeatmap(data) {
+            const chart = echarts.init(document.getElementById('heatmap-chart'));
+            const maxValue = Math.max(...data.map(d => d.value)) || 1000;
+
+            const option = {
                 tooltip: {
                     trigger: 'item',
                     formatter: '{b}：{c} 条评论'
@@ -57,15 +233,16 @@
                     zoom: 1.2,
                     label: {
                         show: true,
-                        fontSize: 12
+                        fontSize: 14,
+                        color: '#333'
                     },
                     emphasis: {
                         label: {
                             show: true,
-                            color: '#333'
+                            color: '#c23531'
                         }
                     },
-                    data: locationData,
+                    data: data,
                     itemStyle: {
                         areaColor: '#f5f5f5',
                         borderColor: '#999'
@@ -73,24 +250,31 @@
                 }]
             };
 
-            heatmapChart.setOption(option);
-            
-        } catch (error) {
+            chart.setOption(option);
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        // 显示错误信息
+        function showErrorMessage(error) {
             console.error('数据加载失败:', error);
-            // 显示错误信息
-            document.getElementById('heatmap-chart').innerHTML = 
-                `<div style="color: red; text-align: center; padding: 20px;">
-                    热力图数据加载失败：${error.message}
+            document.getElementById('heatmap-chart').innerHTML = `
+                <div style="color: red; text-align: center; padding: 30px; background: #fff;
+                            border-radius: 8px; margin: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1)">
+                    <h3 style="margin-bottom: 10px;">⚠️ 数据加载异常</h3>
+                    <p>错误信息：${error.message}</p>
+                    <p style="margin-top: 15px;">请检查：<br>
+                    1. CSV文件是否存在<br>
+                    2. 数据格式是否正确<br>
+                    3. 网络连接状态</p>
                 </div>`;
         }
-    }
 
-    // 初始化并加载数据
-    var heatmapChart = echarts.init(document.getElementById('heatmap-chart'));
-    loadHeatmapData();
-
-    // 窗口自适应
-    window.addEventListener('resize', () => {
-        heatmapChart.resize();
-    });
-</script>
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            if (checkECharts()) {
+                loadHeatmapData();
+            }
+        });
+    </script>
+</body>
+</html>
