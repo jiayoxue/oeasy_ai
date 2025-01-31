@@ -1,196 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>哪吒之魔童闹海评论数据大屏</title>
-    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/echarts/map/js/china.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-            background-image: url('哪吒2网页背景.jpg'); /* 使用背景图 */
-            background-size: cover; /* 背景图覆盖整个页面 */
-            background-attachment: fixed; /* 背景图固定 */
-            filter: blur(5px); /* 背景图模糊化 */
+// 添加了完整的错误处理链
+async function loadHeatmapData() {
+  try {
+    const response = await fetch('location_counts.csv');
+    // 状态码检查
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    // 数据处理流程
+    const rawData = await response.text();
+    const locationData = rawData
+      .split('\n')
+      .filter(row => row.trim())  // 过滤空行
+      .slice(1)  // 跳过CSV标题行
+      .map(row => {
+        // 处理可能包含逗号的城市名
+        const [province, ...valueParts] = row.split(',');
+        const value = parseInt(valueParts.join('').trim());
+        
+        // 数据有效性验证
+        if (!province || isNaN(value)) {
+          console.warn('无效数据行:', row);
+          return null;
         }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-            position: relative; /* 用于绝对定位标题 */
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            position: absolute; /* 绝对定位 */
-            top: 20%; /* 距离顶部20% */
-            left: 50%; /* 距离左侧50% */
-            transform: translate(-50%, -50%); /* 水平和垂直居中 */
-        }
-        .header img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
-        }
-        .movie-info {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #FFD700; /* 金色 */
-        }
-        .movie-info h1 {
-            font-size: 2.5em;
-            color: #FF0000; /* 红色 */
-            font-family: 'Brush Script MT', cursive; /* 艺术字字体 */
-            text-shadow: 2px 2px 4px #000000; /* 添加阴影效果 */
-        }
-        .movie-info p {
-            font-size: 1.2em;
-            color: #FFD700; /* 金色 */
-        }
-        .charts {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .chart {
-            width: 48%;
-            margin-bottom: 20px;
-        }
-        .chart img {
-            width: 100%;
-            height: auto;
-            border-radius: 10px;
-        }
-        .chart #main {
-            width: 100%;
-            height: 600px;
-        }
-        .trailer {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .trailer iframe {
-            width: 100%;
-            height: 400px;
-            border-radius: 10px;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 0.9em;
-            color: #bdc3c7;
-        }
-        /* 新增样式 */
-        .charts-upper {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .charts-lower {
-            display: flex;
-            justify-content: center;
-        }
-        .chart-large {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <img src="哪吒2网页背景.jpg" alt="哪吒之魔童闹海封面">
-        </div>
-        <div class="movie-info">
-            <h1>哪吒之魔童闹海</h1>
-            <p>电影简介：《哪吒之魔童闹海》是一部充满奇幻色彩的动画电影，讲述了哪吒在面对命运的挑战时，勇敢抗争的故事。影片以其精美的画面、深刻的主题和感人的故事赢得了观众的喜爱。</p>
-            <p>豆瓣评分：8.5</p>
-        </div>
-        <div class="trailer">
-            <h2>电影预告片</h2>
-            <iframe src="//player.bilibili.com/player.html?isOutside=true&aid=113784622419507&bvid=BV1zprUY2EGj&cid=27739753766&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
-        </div>
-        <div class="charts">
-            <div class="charts-upper">
-                <div class="chart">
-                    <img src="wordcloud.png" alt="词云图">
-                    <p>词云图</p>
-                </div>
-                <div class="chart">
-                    <img src="sentiment_analysis.png" alt="情感分析饼图">
-                    <p>情感分析饼图</p>
-                </div>
-            </div>
-            <div class="charts-lower">
-                <div class="chart chart-large" id="main">
-                    <script>
-                        // 初始化图表
-                        var myChart = echarts.init(document.getElementById('main'));
-
-                        // 从CSV文件读取数据
-                        fetch('location_counts.csv')
-                            .then(response => response.text())
-                            .then(data => {
-                                var rows = data.split('\n');
-                                var locationData = [];
-                                rows.forEach(row => {
-                                    var cols = row.split(',');
-                                    if (cols.length === 2) {
-                                        locationData.push({name: cols[0].trim(), value: parseInt(cols[1].trim())});
-                                    }
-                                });
-
-                                // 配置项
-                                var option = {
-                                    title: {
-                                        text: '中国城市评论热度图',
-                                        left: 'center'
-                                    },
-                                    tooltip: {
-                                        trigger: 'item',
-                                        formatter: function (params) {
-                                            return params.name + ': ' + params.value + ' 条评论';
-                                        }
-                                    },
-                                    visualMap: {
-                                        min: 0,
-                                        max: 500, // 根据实际数据调整范围
-                                        left: 'left',
-                                        top: 'bottom',
-                                        text: ['高', '低'], // 文本，默认为数值文本
-                                        calculable: true
-                                    },
-                                    series: [
-                                        {
-                                            name: '评论热度',
-                                            type: 'map',
-                                            mapType: 'china',
-                                            roam: true, // 是否开启鼠标缩放和平移漫游
-                                            label: {
-                                                show: true,
-                                                formatter: '{b}'
-                                            },
-                                            data: locationData
-                                        }
-                                    ]
-                                };
-
-                                // 使用配置项和数据显示图表
-                                myChart.setOption(option);
-                            });
-                    </script>
-                </div>
-            </div>
-        </div>
-        <div class="footer">
-            <p>数据来源：豆瓣电影</p>
-        </div>
-    </div>
-</body>
-</html>
+        
+        return {
+          name: province.trim().replace(/"/g, ''),
+          value: value
+        };
+      })
+      .filter(item => item !== null);
+  } catch (error) {
+    // 错误处理
+    console.error('数据加载失败:', error);
+    document.getElementById('heatmap-chart').innerHTML = 
+      `<div style="color: red; text-align: center; padding: 20px;">
+         热力图数据加载失败：${error.message}
+       </div>`;
+  }
+}
