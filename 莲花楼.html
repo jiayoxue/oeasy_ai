@@ -1,246 +1,258 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数据分析可视化</title>
+    <meta charset="utf-8">
+    <title>莲花楼人物关系图</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
-            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: linear-gradient(150deg, #f3e5f5 0%, #e3f2fd 100%);
             margin: 0;
             padding: 20px;
-            background-color: #f0f3f8;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            position: relative;
+        .title-main { 
+            font: 800 38px 'ZCOOL XiaoWei', sans-serif;
+            fill: #4a148c;
+            text-anchor: middle;
+            letter-spacing: 2px;
         }
-        .chart-row {
-            margin: 40px 0;
-            min-height: 600px;
+        .title-sub {
+            font: italic 26px 'Libre Baskerville';
+            fill: #d81b60;
+            text-anchor: middle;
         }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            margin: 30px 0;
+        .node-text {
+            font: 14px 'ZCOOL XiaoWei';
+            fill: #37474f;
+            text-shadow: 1px 1px 2px white;
         }
-        #relationship-chart {
-            width: 100%;
-            height: 600px;
-            border: 1px solid #e0e4e8;
-            border-radius: 8px;
+        .link-text {
+            font: 11px 'Libre Baskerville';
+            fill: #546e7a;
+            pointer-events: none;
         }
-        .pie-container {
-            width: 800px;
-            height: 600px;
-            margin: 0 auto;
+        .legend-text {
+            font: 14px 'ZCOOL XiaoWei';
+            fill: #2c3e50;
         }
-        .data-source {
-            font-size: 12px;
-            color: #7f8c8d;
-            text-align: right;
-            margin-top: 15px;
+        .lotus-watermark {
+            opacity: 0.08;
+            pointer-events: none;
         }
         .signature {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            font-family: "Brush Script MT", cursive;
-            font-size: 28px;
-            color: #e74c3c;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-        }
-        .node {
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .node:hover {
-            filter: brightness(1.1);
-        }
-        .link {
-            stroke: #bdc3c7;
-            stroke-opacity: 0.6;
-        }
-        .legend {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-            border-radius: 3px;
+            font: italic 16px 'Dancing Script';
+            fill: #6d4c41;
+            opacity: 0.8;
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Libre+Baskerville:wght@400;700&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <div class="chart-row">
-            <h1>《莲花楼》人物关系图</h1>
-            <div id="relationship-chart"></div>
-        </div>
-
-        <div class="chart-row">
-            <h1>中国传媒大学2021届毕业生毕业去向</h1>
-            <div class="pie-container" id="pie-chart"></div>
-        </div>
-
-        <div class="data-source">数据来源：中国传媒大学2021届毕业生就业质量报告</div>
-        <div class="signature">
-            <div>22计传</div>
-            <div>简瑀谦</div>
-        </div>
-    </div>
-
     <script>
-        // 人物关系图
-        d3.json("data.json").then(data => {
-            const width = document.getElementById('relationship-chart').clientWidth;
-            const height = 600;
+        // 创建SVG画布
+        const svg = d3.select("body")
+            .append("svg")
+            .attr("width", 1600)
+            .attr("height", 1100)
+            .append("g")
+            .attr("transform", "translate(100,100)");
 
-            const svg = d3.select("#relationship-chart")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
+        // 背景画布
+        svg.append("rect")
+            .attr("width", 1500)
+            .attr("height", 1000)
+            .attr("fill", "#fafafa")
+            .attr("rx", 15)
+            .style("filter", "url(#paperTexture)");
 
-            const simulation = d3.forceSimulation(data.nodes)
-                .force("link", d3.forceLink(data.links).id(d => d.id).distance(100))
-                .force("charge", d3.forceManyBody().strength(-300))
-                .force("center", d3.forceCenter(width/2, height/2));
+        // 宣纸纹理滤镜
+        const defs = svg.append("defs");
+        defs.append("filter")
+            .attr("id", "paperTexture")
+            .append("feTurbulence")
+            .attr("type", "fractalNoise")
+            .attr("baseFrequency", 0.8)
+            .attr("numOctaves", 3)
+            .attr("result", "noise");
+        defs.append("feColorMatrix")
+            .attr("in", "noise")
+            .attr("type", "matrix")
+            .attr("values", "0 0 0 0 0.8 0 0 0 0 0.8 0 0 0 0 0.8 0 0 0 0.2 0")
+            .attr("result", "coloredNoise");
+        defs.append("feBlend")
+            .attr("in", "SourceGraphic")
+            .attr("in2", "coloredNoise")
+            .attr("mode", "multiply");
 
-            const link = svg.append("g")
-                .selectAll("line")
-                .data(data.links)
-                .enter().append("line")
-                .attr("class", "link")
-                .attr("stroke-width", 2);
+        // 莲花水印
+        svg.append("text")
+            .attr("class", "lotus-watermark")
+            .attr("x", 750)
+            .attr("y", 500)
+            .attr("font-size", 180)
+            .attr("text-anchor", "middle")
+            .text("🌸");
 
-            const node = svg.append("g")
-                .selectAll("circle")
-                .data(data.nodes)
-                .enter().append("circle")
-                .attr("class", "node")
-                .attr("r", 20)
-                .attr("fill", "#3498db")
-                .call(d3.drag()
-                    .on("start", dragstarted)
-                    .on("drag", dragged)
-                    .on("end", dragended));
+        // 标题
+        svg.append("text")
+            .attr("class", "title-main")
+            .attr("x", 750)
+            .attr("y", 50)
+            .text("莲 花 楼 人 物 图 谱");
 
-            const labels = svg.append("g")
-                .selectAll("text")
-                .data(data.nodes)
-                .enter().append("text")
-                .text(d => d.id)
-                .attr("font-size", 14)
-                .attr("dx", 25)
-                .attr("dy", 5);
+        svg.append("text")
+            .attr("class", "title-sub")
+            .attr("x", 750)
+            .attr("y", 90)
+            .text("Lotus Tower Character Relationships");
 
-            simulation.on("tick", () => {
-                link
-                    .attr("x1", d => d.source.x)
-                    .attr("y1", d => d.source.y)
-                    .attr("x2", d => d.target.x)
-                    .attr("y2", d => d.target.y);
-
-                node
-                    .attr("cx", d => d.x)
-                    .attr("cy", d => d.y);
-
-                labels
-                    .attr("x", d => d.x)
-                    .attr("y", d => d.y);
-            });
-
-            function dragstarted(event, d) {
-                if (!event.active) simulation.alphaTarget(0.3).restart();
-                d.fx = d.x;
-                d.fy = d.y;
-            }
-
-            function dragged(event, d) {
-                d.fx = event.x;
-                d.fy = event.y;
-            }
-
-            function dragended(event, d) {
-                if (!event.active) simulation.alphaTarget(0);
-                d.fx = null;
-                d.fy = null;
-            }
-        });
-
-        // 毕业生去向饼图（使用原始数据）
-        const gradData = [
-            { category: "国内升学", value: 612, percentage: 14.46 },
-            { category: "出国、出境深造", value: 287, percentage: 6.78 },
-            { category: "直接工作", value: 2699, percentage: 63.76 }
+        // 人物数据
+        const nodes = [
+            {id: "李莲花", type: "核心"}, {id: "方多病", type: "主角"}, 
+            {id: "笛飞声", type: "反派"}, {id: "乔婉娩", type: "情感"},
+            {id: "肖紫衿", type: "情感"}, {id: "角丽谯", type: "反派"},
+            {id: "云彼丘", type: "反派"}, {id: "单孤刀", type: "反派"},
+            {id: "苏小慵", type: "次要"}, {id: "昭翎公主", type: "次要"},
+            {id: "石水", type: "四顾门"}, {id: "何晓惠", type: "四顾门"},
+            {id: "无了大师", type: "中立"}, {id: "玉红烛", type: "案件"},
+            {id: "玉秋霜", type: "案件"}, {id: "宗政明珠", type: "案件"},
+            {id: "旺福", type: "次要"}, {id: "离儿", type: "次要"},
+            {id: "杨昀春", type: "中立"}, {id: "展云飞", type: "中立"}
         ];
 
-        const colors = ["#a6d1e6", "#69add1", "#357abd"];
-        const pieWidth = 800, pieHeight = 600, radius = 200;
+        const links = [
+            {source: "李莲花", target: "方多病", relation: "挚友"},
+            {source: "李莲花", target: "笛飞声", relation: "宿敌→知己"},
+            {source: "李莲花", target: "乔婉娩", relation: "初恋"},
+            {source: "李莲花", target: "单孤刀", relation: "师兄弟"},
+            {source: "乔婉娩", target: "肖紫衿", relation: "夫妻"},
+            {source: "苏小慵", target: "李莲花", relation: "爱慕"},
+            {source: "昭翎公主", target: "方多病", relation: "婚约"},
+            {source: "角丽谯", target: "笛飞声", relation: "痴恋"},
+            {source: "角丽谯", target: "云彼丘", relation: "利用"},
+            {source: "单孤刀", target: "角丽谯", relation: "合作"},
+            {source: "玉红烛", target: "玉秋霜", relation: "母女"},
+            {source: "宗政明珠", target: "玉秋霜", relation: "杀害"},
+            {source: "李莲花", target: "玉红烛", relation: "破案"},
+            {source: "石水", target: "何晓惠", relation: "同门"},
+            {source: "石水", target: "李莲花", relation: "旧部"},
+            {source: "方多病", target: "旺福", relation: "主仆"},
+            {source: "方多病", target: "离儿", relation: "主仆"},
+            {source: "杨昀春", target: "昭翎公主", relation: "护卫"}
+        ];
 
-        const pieSvg = d3.select("#pie-chart")
-            .append("svg")
-            .attr("width", pieWidth)
-            .attr("height", pieHeight)
-            .append("g")
-            .attr("transform", `translate(${pieWidth/2},${pieHeight/2})`);
+        // 力导向图配置
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.id).distance(120))
+            .force("charge", d3.forceManyBody().strength(-800))
+            .force("collide", d3.forceCollide(25))
+            .force("center", d3.forceCenter(750, 500));
 
-        const pie = d3.pie().value(d => d.value);
-        const arc = d3.arc().innerRadius(0).outerRadius(radius);
-
-        // 绘制饼图
-        pieSvg.selectAll("path")
-            .data(pie(gradData))
+        // 绘制连线
+        const link = svg.append("g")
+            .selectAll("path")
+            .data(links)
             .enter().append("path")
-            .attr("d", arc)
-            .attr("fill", (d,i) => colors[i])
-            .attr("stroke", "white")
-            .attr("stroke-width", 2);
+            .attr("class", "link")
+            .attr("stroke", d => ["宿敌→知己","杀害","利用"].includes(d.relation) ? "#e74c3c" : "#95a5a6")
+            .attr("stroke-width", 1.5);
 
-        // 添加数据标签
-        const labelArc = d3.arc()
-            .innerRadius(radius/2)
-            .outerRadius(radius/2);
-
-        pieSvg.selectAll("text")
-            .data(pie(gradData))
+        // 边标签
+        const linkText = svg.append("g")
+            .selectAll(".link-text")
+            .data(links)
             .enter().append("text")
-            .attr("transform", d => `translate(${labelArc.centroid(d)})`)
-            .attr("text-anchor", "middle")
-            .style("font-size", "14px")
-            .text(d => `${d.data.value}人 (${d.data.percentage}%)`);
+            .attr("class", "link-text")
+            .text(d => d.relation);
 
-        // 添加图例
-        const legend = d3.select("#pie-chart")
-            .append("div")
-            .attr("class", "legend");
+        // 节点组
+        const node = svg.append("g")
+            .selectAll(".node-group")
+            .data(nodes)
+            .enter().append("g")
+            .attr("class", "node-group");
 
-        gradData.forEach((d, i) => {
-            const legendItem = legend.append("div")
-                .attr("class", "legend-item");
+        // 节点图形
+        node.append("circle")
+            .attr("r", d => ({
+                核心: 16, 主角: 14, 反派: 14, 
+                情感: 12, 次要: 10
+            }[d.type] || 8))
+            .attr("fill", d => ({
+                核心: "#e74c3c", 主角: "#3498db", 
+                反派: "#2ecc71", 情感: "#9b59b6",
+                次要: "#f1c40f", 中立: "#95a5a6",
+                案件: "#e67e22"
+            }[d.type]));
 
-            legendItem.append("div")
-                .attr("class", "legend-color")
-                .style("background-color", colors[i]);
+        // 节点文字
+        node.append("text")
+            .attr("class", "node-text")
+            .text(d => d.id)
+            .attr("dx", 18)
+            .attr("dy", 0);
 
-            legendItem.append("div")
-                .text(d.category);
+        // 图例
+        const legendData = [
+            {color: "#e74c3c", text: "核心角色"},
+            {color: "#3498db", text: "主角阵营"},
+            {color: "#2ecc71", text: "反派势力"},
+            {color: "#9b59b6", text: "情感关系"},
+            {color: "#f1c40f", text: "次要角色"},
+            {color: "#e67e22", text: "案件相关"}
+        ];
+
+        legendData.forEach((d, i) => {
+            svg.append("circle")
+                .attr("cx", 50)
+                .attr("cy", 100 + i*30)
+                .attr("r", 8)
+                .attr("fill", d.color);
+            
+            svg.append("text")
+                .attr("class", "legend-text")
+                .attr("x", 70)
+                .attr("y", 100 + i*30 + 5)
+                .text(d.text);
         });
+
+        // 动态更新
+        simulation.on("tick", () => {
+            link.attr("d", d => `M${d.source.x},${d.source.y} L${d.target.x},${d.target.y}`);
+            
+            linkText.attr("transform", d => {
+                const dx = d.target.x - d.source.x;
+                const dy = d.target.y - d.source.y;
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                return `translate(${(d.source.x + d.target.x)/2},${(d.source.y + d.target.y)/2}) rotate(${angle})`;
+            })
+            .attr("dx", 12)
+            .style("text-anchor", "middle")
+            .attr("dy", -3);
+
+            node.attr("transform", d => `translate(${d.x},${d.y})`);
+        });
+
+        // 个性签名
+        svg.append("text")
+            .attr("class", "signature")
+            .attr("x", 1350)
+            .attr("y", 950)
+            .text("—— 22计传简瑀谦");
     </script>
+
+    <div style="padding:20px; max-width:800px; margin-left:100px;">
+        <h3>数据说明</h3>
+        <p>本数据综合豆瓣、百度百科及剧情解析，呈现：</p>
+        <ul>
+            <li>20个主要角色</li>
+            <li>18条核心关系</li>
+            <li>6种角色类型</li>
+        </ul>
+        <p>数据来源：
+            <a href="https://movie.douban.com/subject/35613858/" target="_blank">豆瓣</a> |
+            <a href="https://baike.baidu.com/item/莲花楼" target="_blank">百度百科</a>
+        </p>
+    </div>
 </body>
 </html>
