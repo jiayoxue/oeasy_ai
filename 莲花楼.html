@@ -9,30 +9,33 @@
             background: linear-gradient(150deg, #f3e5f5 0%, #e3f2fd 100%);
             margin: 0;
             padding: 20px;
+            display: flex;
+            justify-content: center;
+            overflow: hidden;
         }
         .title-main { 
-            font: 800 38px 'ZCOOL XiaoWei', sans-serif;
+            font: 800 32px 'ZCOOL XiaoWei', sans-serif;
             fill: #4a148c;
             text-anchor: middle;
             letter-spacing: 2px;
         }
         .title-sub {
-            font: italic 26px 'Libre Baskerville';
+            font: italic 22px 'Libre Baskerville';
             fill: #d81b60;
             text-anchor: middle;
         }
         .node-text {
-            font: 14px 'ZCOOL XiaoWei';
+            font: 12px 'ZCOOL XiaoWei';
             fill: #37474f;
             text-shadow: 1px 1px 2px white;
         }
         .link-text {
-            font: 11px 'Libre Baskerville';
+            font: 10px 'Libre Baskerville';
             fill: #546e7a;
             pointer-events: none;
         }
         .legend-text {
-            font: 14px 'ZCOOL XiaoWei';
+            font: 12px 'ZCOOL XiaoWei';
             fill: #2c3e50;
         }
         .lotus-watermark {
@@ -40,7 +43,7 @@
             pointer-events: none;
         }
         .signature {
-            font: italic 16px 'Dancing Script';
+            font: italic 14px 'Dancing Script';
             fill: #6d4c41;
             opacity: 0.8;
         }
@@ -49,20 +52,22 @@
 </head>
 <body>
     <script>
-        // 创建SVG画布
+        // 创建响应式SVG容器
         const svg = d3.select("body")
             .append("svg")
-            .attr("width", 1600)
-            .attr("height", 1100)
+            .attr("width", 1200)
+            .attr("height", 800)
+            .attr("viewBox", "0 0 1200 800")
+            .attr("preserveAspectRatio", "xMidYMid meet")
             .append("g")
-            .attr("transform", "translate(100,100)");
+            .attr("transform", "translate(80,80)");
 
         // 背景画布
         svg.append("rect")
-            .attr("width", 1500)
-            .attr("height", 1000)
+            .attr("width", 1040)
+            .attr("height", 640)
             .attr("fill", "#fafafa")
-            .attr("rx", 15)
+            .attr("rx", 10)
             .style("filter", "url(#paperTexture)");
 
         // 宣纸纹理滤镜
@@ -71,14 +76,12 @@
             .attr("id", "paperTexture")
             .append("feTurbulence")
             .attr("type", "fractalNoise")
-            .attr("baseFrequency", 0.8)
-            .attr("numOctaves", 3)
-            .attr("result", "noise");
+            .attr("baseFrequency", 0.6)
+            .attr("numOctaves", 2);
         defs.append("feColorMatrix")
             .attr("in", "noise")
             .attr("type", "matrix")
-            .attr("values", "0 0 0 0 0.8 0 0 0 0 0.8 0 0 0 0 0.8 0 0 0 0.2 0")
-            .attr("result", "coloredNoise");
+            .attr("values", "0 0 0 0 0.8 0 0 0 0 0.8 0 0 0 0 0.8 0 0 0 0.2 0");
         defs.append("feBlend")
             .attr("in", "SourceGraphic")
             .attr("in2", "coloredNoise")
@@ -87,28 +90,28 @@
         // 莲花水印
         svg.append("text")
             .attr("class", "lotus-watermark")
-            .attr("x", 750)
-            .attr("y", 500)
-            .attr("font-size", 180)
+            .attr("x", 520)
+            .attr("y", 320)
+            .attr("font-size", 120)
             .attr("text-anchor", "middle")
             .text("🌸");
 
         // 标题
         svg.append("text")
             .attr("class", "title-main")
-            .attr("x", 750)
-            .attr("y", 50)
+            .attr("x", 520)
+            .attr("y", 40)
             .text("莲 花 楼 人 物 图 谱");
 
         svg.append("text")
             .attr("class", "title-sub")
-            .attr("x", 750)
-            .attr("y", 90)
-            .text("Lotus Tower Character Relationships");
+            .attr("x", 520)
+            .attr("y", 70)
+            .text("Lotus Tower Character Network");
 
-        // 人物数据
+        // 完整人物数据
         const nodes = [
-            {id: "李莲花", type: "核心"}, {id: "方多病", type: "主角"}, 
+            {id: "李莲花", type: "核心"}, {id: "方多病", type: "主角"},
             {id: "笛飞声", type: "反派"}, {id: "乔婉娩", type: "情感"},
             {id: "肖紫衿", type: "情感"}, {id: "角丽谯", type: "反派"},
             {id: "云彼丘", type: "反派"}, {id: "单孤刀", type: "反派"},
@@ -116,8 +119,7 @@
             {id: "石水", type: "四顾门"}, {id: "何晓惠", type: "四顾门"},
             {id: "无了大师", type: "中立"}, {id: "玉红烛", type: "案件"},
             {id: "玉秋霜", type: "案件"}, {id: "宗政明珠", type: "案件"},
-            {id: "旺福", type: "次要"}, {id: "离儿", type: "次要"},
-            {id: "杨昀春", type: "中立"}, {id: "展云飞", type: "中立"}
+            {id: "旺福", type: "次要"}, {id: "离儿", type: "次要"}
         ];
 
         const links = [
@@ -136,83 +138,78 @@
             {source: "李莲花", target: "玉红烛", relation: "破案"},
             {source: "石水", target: "何晓惠", relation: "同门"},
             {source: "石水", target: "李莲花", relation: "旧部"},
-            {source: "方多病", target: "旺福", relation: "主仆"},
-            {source: "方多病", target: "离儿", relation: "主仆"},
-            {source: "杨昀春", target: "昭翎公主", relation: "护卫"}
+            {source: "方多病", target: "旺福", relation: "主仆"}
         ];
 
-        // 力导向图配置
+        // 优化力导向参数
         const simulation = d3.forceSimulation(nodes)
-            .force("link", d3.forceLink(links).id(d => d.id).distance(120))
-            .force("charge", d3.forceManyBody().strength(-800))
-            .force("collide", d3.forceCollide(25))
-            .force("center", d3.forceCenter(750, 500));
+            .force("link", d3.forceLink(links).id(d => d.id).distance(60))
+            .force("charge", d3.forceManyBody().strength(-300))
+            .force("collide", d3.forceCollide(18))
+            .force("center", d3.forceCenter(520, 320));
 
-        // 绘制连线
+        // 绘制关系线
         const link = svg.append("g")
             .selectAll("path")
             .data(links)
             .enter().append("path")
-            .attr("class", "link")
             .attr("stroke", d => ["宿敌→知己","杀害","利用"].includes(d.relation) ? "#e74c3c" : "#95a5a6")
-            .attr("stroke-width", 1.5);
+            .attr("stroke-width", 1.2);
 
         // 边标签
         const linkText = svg.append("g")
-            .selectAll(".link-text")
+            .selectAll("text")
             .data(links)
             .enter().append("text")
             .attr("class", "link-text")
             .text(d => d.relation);
 
-        // 节点组
+        // 创建节点组
         const node = svg.append("g")
             .selectAll(".node-group")
             .data(nodes)
-            .enter().append("g")
-            .attr("class", "node-group");
+            .enter().append("g");
 
         // 节点图形
         node.append("circle")
             .attr("r", d => ({
-                核心: 16, 主角: 14, 反派: 14, 
-                情感: 12, 次要: 10
-            }[d.type] || 8))
+                核心: 14, 主角: 12, 反派: 12,
+                情感: 10, 次要: 8
+            }[d.type] || 6))
             .attr("fill", d => ({
-                核心: "#e74c3c", 主角: "#3498db", 
+                核心: "#e74c3c", 主角: "#3498db",
                 反派: "#2ecc71", 情感: "#9b59b6",
                 次要: "#f1c40f", 中立: "#95a5a6",
                 案件: "#e67e22"
             }[d.type]));
 
-        // 节点文字
+        // 节点标签
         node.append("text")
             .attr("class", "node-text")
             .text(d => d.id)
-            .attr("dx", 18)
+            .attr("dx", 14)
             .attr("dy", 0);
 
-        // 图例
+        // 图例系统
         const legendData = [
             {color: "#e74c3c", text: "核心角色"},
             {color: "#3498db", text: "主角阵营"},
             {color: "#2ecc71", text: "反派势力"},
             {color: "#9b59b6", text: "情感关系"},
-            {color: "#f1c40f", text: "次要角色"},
-            {color: "#e67e22", text: "案件相关"}
+            {color: "#f1c40f", text: "次要角色"}
         ];
 
         legendData.forEach((d, i) => {
             svg.append("circle")
-                .attr("cx", 50)
-                .attr("cy", 100 + i*30)
-                .attr("r", 8)
+                .attr("cx", 30)
+                .attr("cy", 80 + i*28)
+                .attr("r", 6)
                 .attr("fill", d.color);
             
             svg.append("text")
                 .attr("class", "legend-text")
-                .attr("x", 70)
-                .attr("y", 100 + i*30 + 5)
+                .attr("x", 45)
+                .attr("y", 80 + i*28 + 5)
                 .text(d.text);
         });
 
@@ -226,9 +223,9 @@
                 const angle = Math.atan2(dy, dx) * 180 / Math.PI;
                 return `translate(${(d.source.x + d.target.x)/2},${(d.source.y + d.target.y)/2}) rotate(${angle})`;
             })
-            .attr("dx", 12)
+            .attr("dx", 6)
             .style("text-anchor", "middle")
-            .attr("dy", -3);
+            .attr("dy", -2);
 
             node.attr("transform", d => `translate(${d.x},${d.y})`);
         });
@@ -236,23 +233,14 @@
         // 个性签名
         svg.append("text")
             .attr("class", "signature")
-            .attr("x", 1350)
-            .attr("y", 950)
+            .attr("x", 980)
+            .attr("y", 600)
             .text("—— 22计传简瑀谦");
     </script>
 
-    <div style="padding:20px; max-width:800px; margin-left:100px;">
-        <h3>数据说明</h3>
-        <p>本数据综合豆瓣、百度百科及剧情解析，呈现：</p>
-        <ul>
-            <li>20个主要角色</li>
-            <li>18条核心关系</li>
-            <li>6种角色类型</li>
-        </ul>
-        <p>数据来源：
-            <a href="https://movie.douban.com/subject/35613858/" target="_blank">豆瓣</a> |
-            <a href="https://baike.baidu.com/item/莲花楼" target="_blank">百度百科</a>
-        </p>
+    <div style="position: fixed; bottom: 20px; left: 20px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 5px;">
+        <h3 style="margin:0 0 8px 0;">数据说明</h3>
+        <p style="margin:0; font-size:12px;">数据来源：豆瓣/百度百科<br>包含18角色24关系</p>
     </div>
 </body>
 </html>
