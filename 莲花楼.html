@@ -1,87 +1,154 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Force-Directed Graph</title>
+    <title>数据分析可视化</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f3f8;
         }
-        svg {
-            border: 1px solid #ccc;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
-        text {
-            pointer-events: none;
+        .chart-row {
+            margin: 40px 0;
+            min-height: 600px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin: 30px 0;
+        }
+        #relationship-chart {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #e0e4e8;
+            border-radius: 8px;
+        }
+        .pie-container {
+            width: 800px;
+            height: 600px;
+            margin: 0 auto;
+        }
+        .data-source {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-align: right;
+            margin-top: 15px;
+        }
+        .signature {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            font-family: "Brush Script MT", cursive;
+            font-size: 28px;
+            color: #e74c3c;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .node {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .node:hover {
+            filter: brightness(1.1);
+        }
+        .link {
+            stroke: #bdc3c7;
+            stroke-opacity: 0.6;
+        }
+        .legend {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 3px;
         }
     </style>
 </head>
 <body>
-    <svg width="800" height="600"></svg>
+    <div class="container">
+        <div class="chart-row">
+            <h1>《莲花楼》人物关系图</h1>
+            <div id="relationship-chart"></div>
+        </div>
+
+        <div class="chart-row">
+            <h1>中国传媒大学2021届毕业生毕业去向</h1>
+            <div class="pie-container" id="pie-chart"></div>
+        </div>
+
+        <div class="data-source">数据来源：中国传媒大学2021届毕业生就业质量报告</div>
+        <div class="signature">
+            <div>22计传</div>
+            <div>简瑀谦</div>
+        </div>
+    </div>
+
     <script>
-        // 获取 SVG 容器
-        const svg = d3.select("svg");
-        const width = +svg.attr("width");
-        const height = +svg.attr("height");
+        // 人物关系图
+        d3.json("data.json").then(data => {
+            const width = document.getElementById('relationship-chart').clientWidth;
+            const height = 600;
 
-        // 定义颜色比例尺
-        const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+            const svg = d3.select("#relationship-chart")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
 
-        // 定义力导向图
-        const simulation = d3.forceSimulation()
-            .force("charge", d3.forceManyBody().strength(-500))
-            .force("link", d3.forceLink().id(d => d.id))
-            .force("center", d3.forceCenter(width / 2, height / 2));
+            const simulation = d3.forceSimulation(data.nodes)
+                .force("link", d3.forceLink(data.links).id(d => d.id).distance(100))
+                .force("charge", d3.forceManyBody().strength(-300))
+                .force("center", d3.forceCenter(width/2, height/2));
 
-        // 读取 JSON 数据
-        d3.json("xx.json").then(data => {
-            const nodes = data.nodes;
-            const links = data.links;
-
-            // 设置节点的大小比例尺
-            const nodeSizeScale = d3.scaleLinear()
-                .domain([0, d3.max(links, d => d.value)])
-                .range([10, 30]);
-
-            // 绑定数据到力导向图
-            simulation.nodes(nodes);
-            simulation.force("link").links(links);
-
-            // 绘制边
             const link = svg.append("g")
                 .selectAll("line")
-                .data(links)
+                .data(data.links)
                 .enter().append("line")
-                .attr("stroke", "#999")
-                .attr("stroke-opacity", 0.6)
-                .attr("stroke-width", d => d.value);
+                .attr("class", "link")
+                .attr("stroke-width", 2);
 
-            // 绘制节点
             const node = svg.append("g")
                 .selectAll("circle")
-                .data(nodes)
+                .data(data.nodes)
                 .enter().append("circle")
-                .attr("r", d => nodeSizeScale(d.value))
-                .attr("fill", (d, i) => colorScale(i))
+                .attr("class", "node")
+                .attr("r", 20)
+                .attr("fill", "#3498db")
                 .call(d3.drag()
-                    .on("start", dragStarted)
+                    .on("start", dragstarted)
                     .on("drag", dragged)
-                    .on("end", dragEnded));
+                    .on("end", dragended));
 
-            // 添加节点文本
-            const text = svg.append("g")
+            const labels = svg.append("g")
                 .selectAll("text")
-                .data(nodes)
+                .data(data.nodes)
                 .enter().append("text")
-                .attr("x", d => d.x)
-                .attr("y", d => d.y)
-                .attr("dy", "0.35em")
-                .text(d => d.name)
-                .style("font-size", "12px")
-                .style("fill", "#333");
+                .text(d => d.id)
+                .attr("font-size", 14)
+                .attr("dx", 25)
+                .attr("dy", 5);
 
-            // 每次力导向图更新时调用
             simulation.on("tick", () => {
                 link
                     .attr("x1", d => d.source.x)
@@ -93,28 +160,87 @@
                     .attr("cx", d => d.x)
                     .attr("cy", d => d.y);
 
-                text
+                labels
                     .attr("x", d => d.x)
                     .attr("y", d => d.y);
             });
+
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
         });
 
-        function dragStarted(event, d) {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
-            d.fx = d.x;
-            d.fy = d.y;
-        }
+        // 毕业生去向饼图（使用原始数据）
+        const gradData = [
+            { category: "国内升学", value: 612, percentage: 14.46 },
+            { category: "出国、出境深造", value: 287, percentage: 6.78 },
+            { category: "直接工作", value: 2699, percentage: 63.76 }
+        ];
 
-        function dragged(event, d) {
-            d.fx = event.x;
-            d.fy = event.y;
-        }
+        const colors = ["#a6d1e6", "#69add1", "#357abd"];
+        const pieWidth = 800, pieHeight = 600, radius = 200;
 
-        function dragEnded(event, d) {
-            if (!event.active) simulation.alphaTarget(0);
-            d.fx = null;
-            d.fy = null;
-        }
+        const pieSvg = d3.select("#pie-chart")
+            .append("svg")
+            .attr("width", pieWidth)
+            .attr("height", pieHeight)
+            .append("g")
+            .attr("transform", `translate(${pieWidth/2},${pieHeight/2})`);
+
+        const pie = d3.pie().value(d => d.value);
+        const arc = d3.arc().innerRadius(0).outerRadius(radius);
+
+        // 绘制饼图
+        pieSvg.selectAll("path")
+            .data(pie(gradData))
+            .enter().append("path")
+            .attr("d", arc)
+            .attr("fill", (d,i) => colors[i])
+            .attr("stroke", "white")
+            .attr("stroke-width", 2);
+
+        // 添加数据标签
+        const labelArc = d3.arc()
+            .innerRadius(radius/2)
+            .outerRadius(radius/2);
+
+        pieSvg.selectAll("text")
+            .data(pie(gradData))
+            .enter().append("text")
+            .attr("transform", d => `translate(${labelArc.centroid(d)})`)
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text(d => `${d.data.value}人 (${d.data.percentage}%)`);
+
+        // 添加图例
+        const legend = d3.select("#pie-chart")
+            .append("div")
+            .attr("class", "legend");
+
+        gradData.forEach((d, i) => {
+            const legendItem = legend.append("div")
+                .attr("class", "legend-item");
+
+            legendItem.append("div")
+                .attr("class", "legend-color")
+                .style("background-color", colors[i]);
+
+            legendItem.append("div")
+                .text(d.category);
+        });
     </script>
 </body>
 </html>
