@@ -1,21 +1,13 @@
 {
   "nodes": [
-    {"id": "李莲花", "name": "李莲花/李相夷", "group": 1},
-    {"id": "方多病", "name": "方多病", "group": 1},
-    {"id": "笛飞声", "name": "笛飞声", "group": 1},
-    {"id": "乔婉娩", "name": "乔婉娩", "group": 2},
-    {"id": "肖紫衿", "name": "肖紫衿", "group": 2},
-    {"id": "角丽谯", "name": "角丽谯", "group": 3},
-    {"id": "云比丘", "name": "云比丘", "group": 3},
-    {"id": "苏小慵", "name": "苏小慵", "group": 4}
+    {"id": "李莲花", "group": 1},
+    {"id": "方多病", "group": 2},
+    {"id": "笛飞声", "group": 3},
+    {"id": "乔婉娩", "group": 4}
   ],
   "links": [
-    {"source": "李莲花", "target": "方多病", "value": 5},
-    {"source": "李莲花", "target": "笛飞声", "value": 5},
-    {"source": "李莲花", "target": "乔婉娩", "value": 3},
-    {"source": "乔婉娩", "target": "肖紫衿", "value": 3},
-    {"source": "笛飞声", "target": "角丽谯", "value": 3},
-    {"source": "李莲花", "target": "云比丘", "value": 2},
-    {"source": "李莲花", "target": "苏小慵", "value": 2}
+    {"source": "李莲花", "target": "方多病", "value": "搭档"},
+    {"source": "李莲花", "target": "笛飞声", "value": "对手"},
+    {"source": "李莲花", "target": "乔婉娩", "value": "旧识"}
   ]
 }
